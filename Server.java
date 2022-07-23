@@ -1,15 +1,20 @@
-// This Client-Server can chat together but only 1 message at each time.
-// Suppose, Client can only send 1 message to Server and cannot send anymore until he/she gets reply from Server.
-// This is a problem and I hope I will solve in next update.
-// Akif Islam
+/*
+
+Trying to Make a FTP Server to will react like this :
+client to receiver :
+"ls" or "dir" - sends all the available file lists
+"-d <filename>" - server sends the file to receiver
+"-u <filename>" - client sends the file to receiver
+
+*/
+
 
 package io.github.akifislam;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Server {
@@ -20,6 +25,8 @@ public class Server {
         Socket socket = serverSocket.accept(); // Kew Connect hote chaile Accept korbe
         System.out.println("Server has accepted a new connection");
         Scanner sc = new Scanner(System.in);
+        File f1, fileList[];
+
         while (true) {
 
             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream()); // To Receive Data from Client
@@ -30,8 +37,43 @@ public class Server {
                 System.out.println("Client : " + (String) clientMessage);
 
                 String serverMessage = (String) clientMessage;
-                String toClientMessage = sc.nextLine();
-                serverMessage = toClientMessage;
+
+                // Sending All File Names
+                if (serverMessage.equalsIgnoreCase("dir") || serverMessage.equalsIgnoreCase("ls")) {
+                    serverMessage = ("Sending all the file names in servers directory");
+                    String dirname = "/Users/akifislam/IdeaProjects/SocketProgramming/FTP/ServerDirectory";
+
+                    // Send File List
+                    f1 = new File(dirname);
+                    fileList = f1.listFiles();
+
+                    // Sort Alphabetically
+                    Arrays.sort(fileList);
+                    System.out.println(fileList);
+                    System.out.println(fileList.toString());
+
+                    serverMessage = "\n";
+                    //Sending All File Names
+                    for (int i = 0; i < fileList.length; i++) {
+                        serverMessage += (fileList[i].getName() + "\n");
+                    }
+
+                } else if (serverMessage.startsWith("-d")) {
+                    System.out.println("Sending a File from Server");
+                    serverMessage = ("Downloading a File");
+                    FileInputStream fr = new FileInputStream("/Users/akifislam/IdeaProjects/SocketProgramming/FTP/ServerDirectory/test1.java");
+                    byte [] b = new byte[90000];
+                    fr.read(b,0,b.length);
+                    OutputStream os = socket.getOutputStream();
+                    os.write(b,0,b.length);
+
+
+
+
+                } else if (serverMessage.startsWith("-u")) {
+                    serverMessage = ("Uploading a File");
+                }
+
 
                 // Sent to Client
                 oos.writeObject(serverMessage);
