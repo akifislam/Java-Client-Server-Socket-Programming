@@ -8,6 +8,12 @@ client to receiver :
 
 */
 
+/*
+* Next Task to Do :
+* 1. Check if the file exists or not
+* 2. If not, then show an error message.
+* */
+
 
 package io.github.akifislam;
 
@@ -15,19 +21,19 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.Scanner;
 
 public class Server {
 
+    public static Socket socket;
+
     public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(6000); // Jodi Port Already Busy thake
-        System.out.println("Server Started on PORT 6000.\nListening ....");
-        Socket socket = serverSocket.accept(); // Kew Connect hote chaile Accept korbe
-        System.out.println("Server has accepted a new connection");
-        Scanner sc = new Scanner(System.in);
-        File f1, fileList[];
+        ServerSocket serverSocket = new ServerSocket(6000);
 
         while (true) {
+           // Jodi Port Already Busy thake
+            System.out.println("Server Started on PORT 6000.\nListening ....");
+            socket = serverSocket.accept(); // Kew Connect hote chaile Accept korbe
+            System.out.println("Server has accepted a new connection");
 
             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream()); // To Receive Data from Client
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream()); // To Send data to Client
@@ -40,10 +46,12 @@ public class Server {
 
                 // Sending All File Names
                 if (serverMessage.equalsIgnoreCase("dir") || serverMessage.equalsIgnoreCase("ls")) {
-                    serverMessage = ("Sending all the file names in servers directory");
+
                     String dirname = "/Users/akifislam/IdeaProjects/SocketProgramming/FTP/ServerDirectory";
 
                     // Send File List
+                    File f1, fileList[];
+
                     f1 = new File(dirname);
                     fileList = f1.listFiles();
 
@@ -57,32 +65,52 @@ public class Server {
                     for (int i = 0; i < fileList.length; i++) {
                         serverMessage += (fileList[i].getName() + "\n");
                     }
+                    oos.writeObject(serverMessage);
+                    oos.flush();
+
 
                 } else if (serverMessage.startsWith("-d")) {
-                    System.out.println("Sending a File from Server");
-                    serverMessage = ("Downloading a File");
-                    FileInputStream fr = new FileInputStream("/Users/akifislam/IdeaProjects/SocketProgramming/FTP/ServerDirectory/test1.java");
-                    byte [] b = new byte[90000];
-                    fr.read(b,0,b.length);
+                    //Getting File Names
+                    String filename = "";
+                    for (int i = 3; i < serverMessage.length(); i++) {
+                        filename+=serverMessage.charAt(i);
+                    }
+                    System.out.println("Got FileName : " +filename);
+                    File file = new File("/Users/akifislam/IdeaProjects/SocketProgramming/FTP/ServerDirectory/" +filename);
+                    FileInputStream fis = new FileInputStream(file);
+                    BufferedInputStream bis = new BufferedInputStream(fis); //Get socket's output stream
                     OutputStream os = socket.getOutputStream();
-                    os.write(b,0,b.length);
+                    //Read File Contents into contents array
+                    byte[] contents;
+                    long fileLength = file.length();
+                    long current = 0;
+                    long start = System.nanoTime();
+                    while (current != fileLength) {
+                        int size = 10000;
+                        if (fileLength - current >= size)
+                            current += size;
+                        else {
+                            size = (int) (fileLength - current);
+                            current = fileLength;
+                        }
+                        contents = new byte[size];
+                        bis.read(contents, 0, size);
+                        os.write(contents);
+                        System.out.print("Sending file ... " + (current * 100) / fileLength + "% complete!");
 
+                    }
 
+                    os.flush();
+                    socket.close();
 
-
-                } else if (serverMessage.startsWith("-u")) {
-                    serverMessage = ("Uploading a File");
+                } else {
+                    oos.writeObject(serverMessage.toUpperCase());
                 }
-
-
-                // Sent to Client
-                oos.writeObject(serverMessage);
 
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 System.out.println("Could not receive message from client :( ");
             }
-
         }
 
 
