@@ -33,7 +33,7 @@ public class Client {
                 if(message.startsWith("-d")){
                     byte[] contents = new byte[10000];
                     //Initialize the FileOutputStream to the output file's full path.
-                    FileOutputStream fos = new FileOutputStream("/Users/akifislam/IdeaProjects/SocketProgramming/FTP/ClientDirectory/downloaded.java");
+                    FileOutputStream fos = new FileOutputStream("/Users/akifislam/IdeaProjects/SocketProgramming/src/io/github/akifislam/FTP/ClientDirectory/download.pdf");
                     BufferedOutputStream bos = new BufferedOutputStream(fos);
                     InputStream is = socket.getInputStream(); //No of bytes read in one read() call
                     int bytesRead = 0;

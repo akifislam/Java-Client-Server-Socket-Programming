@@ -47,7 +47,7 @@ public class Server {
                 // Sending All File Names
                 if (serverMessage.equalsIgnoreCase("dir") || serverMessage.equalsIgnoreCase("ls")) {
 
-                    String dirname = "/Users/akifislam/IdeaProjects/SocketProgramming/FTP/ServerDirectory";
+                    String dirname = "/Users/akifislam/IdeaProjects/SocketProgramming/src/io/github/akifislam/FTP/ServerDirectory";
 
                     // Send File List
                     File f1, fileList[];
@@ -76,7 +76,7 @@ public class Server {
                         filename+=serverMessage.charAt(i);
                     }
                     System.out.println("Got FileName : " +filename);
-                    File file = new File("/Users/akifislam/IdeaProjects/SocketProgramming/FTP/ServerDirectory/" +filename);
+                    File file = new File("/Users/akifislam/IdeaProjects/SocketProgramming/src/io/github/akifislam/FTP/ServerDirectory/" +filename);
                     FileInputStream fis = new FileInputStream(file);
                     BufferedInputStream bis = new BufferedInputStream(fis); //Get socket's output stream
                     OutputStream os = socket.getOutputStream();
